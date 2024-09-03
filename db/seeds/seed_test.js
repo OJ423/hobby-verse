@@ -1,7 +1,15 @@
 const format = require("pg-format");
 const { db } = require("../connection");
+const { hashPasswords } = require("./utils");
 
-const seedTest = async () => {
+const seedTest = async ({
+  userData,
+  eventsData,
+  categoryData,
+  ticketData,
+  eventTicketData,
+  ordersData,
+}) => {
   try {
     // DROP TABLES
 
@@ -29,7 +37,7 @@ const seedTest = async () => {
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) UNIQUE NOT NULL,
         description TEXT
-      )`)
+      )`);
     await db.query(`
       CREATE TABLE events (
         id SERIAL PRIMARY KEY,
@@ -41,8 +49,8 @@ const seedTest = async () => {
         event_category_id INT REFERENCES event_categories(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
-      )`)
-      await db.query(`
+      )`);
+    await db.query(`
         CREATE TABLE tickets (
           id SERIAL PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
@@ -53,8 +61,8 @@ const seedTest = async () => {
           is_free BOOLEAN DEFAULT FALSE,
           created_at TIMESTAMP DEFAULT NOW(),
           updated_at TIMESTAMP DEFAULT NOW()
-        )`)
-      await db.query(`
+        )`);
+    await db.query(`
         CREATE TABLE event_tickets (
           id SERIAL PRIMARY KEY,
           event_id INT REFERENCES events(id) ON DELETE CASCADE,
@@ -63,8 +71,8 @@ const seedTest = async () => {
           created_at TIMESTAMP DEFAULT NOW(),
           updated_at TIMESTAMP DEFAULT NOW(),
           UNIQUE(event_id, ticket_id)
-        )`)
-      await db.query(`
+        )`);
+    await db.query(`
         CREATE TABLE orders (
           id SERIAL PRIMARY KEY, 
           event_ticket_id INT REFERENCES event_tickets(id) ON DELETE SET NULL,
@@ -76,7 +84,85 @@ const seedTest = async () => {
           payment_status VARCHAR(50) DEFAULT 'Pending',
           created_at TIMESTAMP DEFAULT NOW(),
           updated_at   TIMESTAMP DEFAULT NOW()
-        )`)
+        )`);
+
+    // ADD DATA
+
+    const insertUsers = format (`
+      INSERT INTO users (
+        name, email, password_hash, role)
+        VALUES %L`,
+      userData.map(({name, email, password_hash, role}) => {
+        // encrypt password
+        const encryptedPassword = hashPasswords(password_hash)
+        return [name, email, encryptedPassword, role]
+      })
+    );
+
+    await db.query(insertUsers)
+
+    // ADD CATEGORIES
+
+    const insertCategories = format(`
+      INSERT INTO event_categories 
+      ( name, description ) VALUES %L;`,
+      categoryData.map(({name, description}) => {
+        return [name, description]
+      })
+    )
+
+    await db.query(insertCategories)
+
+    // Add EVENTS
+
+    const insertEvents = format(`
+      INSERT INTO events 
+      (name, description, date, location, capacity, event_category_id) VALUES %L`,
+      eventsData.map(({name, description, date, location, capacity, event_category_id}) => {
+        return [name, description, date, location, capacity, event_category_id]
+      })
+    )
+
+    await db.query(insertEvents)
+
+    // ADD TICKETS
+
+    const insertTickets = format(`
+      INSERT INTO tickets 
+      (name, description, limitations, qty_tickets, price, is_free)
+      VALUES %L`,
+      ticketData.map(({name, description, limitations, qty_tickets, price, is_free}) => {
+        return [name, description, limitations, qty_tickets, price, is_free]
+      })
+    )
+
+    await db.query(insertTickets)
+
+    // ADD EVENT TICKETS
+
+    const insertEventTickets = format(`
+      INSERT INTO event_tickets
+      (event_id, ticket_id, quantity, created_at, updated_at)
+      VALUES %L`,
+      eventTicketData.map(({event_id, ticket_id, quantity, created_at, updated_at}) => {
+        return [event_id, ticket_id, quantity, created_at, updated_at]
+      })
+    )
+
+    await db.query(insertEventTickets)
+
+    // ADD ORDERS
+
+    const insertOrders = format(`
+      INSERT INTO orders
+      (event_ticket_id, user_id, customer_name, customer_email, quantity, total_amount, payment_status)
+      VALUES %L`,
+      ordersData.map(({event_ticket_id, user_id, customer_name, customer_email, quantity, total_amount, payment_status}) => {
+        return [event_ticket_id, user_id, customer_name, customer_email, quantity, total_amount, payment_status]
+      })
+    )
+
+
   } catch (err) {
     console.log(err);
   }

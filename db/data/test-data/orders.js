@@ -1,0 +1,38 @@
+module.exports = [
+  {
+    event_ticket_id: 1,
+    user_id: 4,
+    customer_name: "Customer User 1",
+    customer_email: "customer1@example.com",
+    quantity: 2,
+    total_amount: 100.0,
+    payment_status: "Completed",
+  },
+  {
+    event_ticket_id: 3,
+    user_id: 4,
+    customer_name: "Customer User 1",
+    customer_email: "customer1@example.com",
+    quantity: 1,
+    total_amount: 30.0,
+    payment_status: "Completed",
+  },
+  {
+    event_ticket_id: 4,
+    user_id: 5,
+    customer_name: "Customer User 2",
+    customer_email: "customer2@example.com",
+    quantity: 3,
+    total_amount: 225.0,
+    payment_status: "Completed",
+  },
+  {
+    event_ticket_id: 5,
+    user_id: 5,
+    customer_name: "Customer User 2",
+    customer_email: "customer2@example.com",
+    quantity: 2,
+    total_amount: 300.0,
+    payment_status: "Completed",
+  },
+];
