@@ -28,7 +28,11 @@ exports.postCategory = async (req, res, next) => {
   try {
     const {user, body} = req
     const category = await insertCategory(user.id, body)
-    res.status(201).send({category})
+    const token = await jwt.sign(
+      { id: user.id, name: user.name }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    res.status(201).send({category, token})
   }
   catch(err) {
     next(err)
@@ -40,7 +44,11 @@ exports.patchCategory = async (req, res, next) => {
     const {user,body} = req;
     const {categoryId} = req.params;
     const category = await editCategory(user.id, categoryId, body)
-    res.status(200).send({category})
+    const token = await jwt.sign(
+      { id: user.id, name: user.name }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    res.status(200).send({category, token})
   }
   catch(err) {
     next(err)
@@ -52,7 +60,11 @@ exports.deleteCategory = async (req, res, next) => {
     const { user } = req;
     const { categoryId } = req.params;
     const category = await removeCategory(user.id, categoryId)
-    res.status(200).send({msg: "Category deleted", category})
+    const token = await jwt.sign(
+      { id: user.id, name: user.name }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    res.status(200).send({msg: "Category deleted", category, token})
   }
   catch(err) {
     next(err)
