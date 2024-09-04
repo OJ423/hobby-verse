@@ -270,7 +270,7 @@ describe("Events", () => {
 })
 
 
-describe.only("Categories", () => {
+describe("Categories", () => {
   // GET EVENTS
   it("responds with all categories", () => {
     return request(app)
@@ -395,6 +395,135 @@ describe.only("Categories", () => {
       expect(body.msg).toBe("Category deleted")
       expect(body.category.name).toBe("Music")
       expect(body.category.description).toBe("Live music events")
+    })
+  })
+})
+
+describe.only("Tickets", () => {
+  // GET TICKETS
+  it("responds with all tickets for admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get("/api/tickets/")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.tickets.length).toBe(5)
+      expect(body.tickets[0].name).toBe("General Admission")
+      expect(body.tickets[2].description).toBe("Discounted ticket for early purchase")
+    })
+  })
+  it("responds with all tickets for staff", () => {
+    const token = jwt.sign(
+      { id: 2, name: "Shop User 1" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get("/api/tickets/")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.tickets.length).toBe(5)
+      expect(body.tickets[0].name).toBe("General Admission")
+      expect(body.tickets[2].description).toBe("Discounted ticket for early purchase")
+    })
+  })
+  it("prevents unauthorised access for customers trying to access all tickets", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get("/api/tickets/")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(401)
+    .then(({body}) => {
+      expect(body.msg).toBe("You are unauthorized to view all tickets")
+    })
+  })
+  it("responds with a single category", () => {
+    return request(app)
+    .get("/api/tickets/1")
+    .expect(200)
+    .then(({body}) => {
+      const { ticket } = body
+      expect(ticket.name).toBe("General Admission")
+      expect(ticket.description).toBe("Access to the main event")
+    })
+  })
+  it("responds 404 for non-existent category", () => {
+    return request(app)
+    .get("/api/tickets/11")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toEqual("Ticket cannot be found")
+    })
+  })
+  it("responds 400 for invalid request", () => {
+    return request(app)
+    .get("/api/tickets/one")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe("Invalid data type")
+    })
+  })
+  // ADD TICKETS
+  it("adds a ticket if the user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post("/api/tickets/new")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      name: "Family Ticket",
+      description: "2 adults and 2 under 16s",
+      limitations: null,
+      qty_tickets:4,
+      price: 35.00,
+      is_free: false
+    })
+    .expect(201)
+    .then(({body}) => {
+      expect(body.ticket.name).toBe("Family Ticket")
+      expect(body.ticket.description).toBe("2 adults and 2 under 16s")
+    })
+  })
+  // EDIT TICKETS
+  it("edits a ticket if user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .patch("/api/tickets/edit/3")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      name: "Early Bird Gets a Discount",
+    })
+    .expect(200)
+    .then(({body}) => {
+      expect(body.ticket.name).toBe("Early Bird Gets a Discount")
+      expect(body.ticket.price).toBe("30.00")
+    })
+  })
+  // DELETE TICKETS
+  it("deletes a ticket if user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .delete("/api/tickets/delete/1")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.msg).toBe("Ticket deleted")
+      expect(body.ticket.name).toBe("General Admission")
     })
   })
 })
