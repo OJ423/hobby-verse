@@ -48,7 +48,9 @@ const seedTest = async ({
         capacity INT NOT NULL,
         event_category_id INT REFERENCES event_categories(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
+        updated_at TIMESTAMP DEFAULT NOW(),
+        img VARCHAR DEFAULT NULL,
+        status VARCHAR(10) CHECK (status IN ('draft', 'published')) NOT NULL DEFAULT 'draft'
       )`);
     await db.query(`
         CREATE TABLE tickets (
@@ -113,13 +115,13 @@ const seedTest = async ({
 
     await db.query(insertCategories)
 
-    // Add EVENTS
+    // ADD EVENTS
 
     const insertEvents = format(`
       INSERT INTO events 
-      (name, description, date, location, capacity, event_category_id) VALUES %L`,
-      eventsData.map(({name, description, date, location, capacity, event_category_id}) => {
-        return [name, description, date, location, capacity, event_category_id]
+      (name, description, date, location, capacity, event_category_id, img, status) VALUES %L`,
+      eventsData.map(({name, description, date, location, capacity, event_category_id, img, status}) => {
+        return [name, description, date, location, capacity, event_category_id, img, status]
       })
     )
 
