@@ -6,6 +6,7 @@ module.exports = [
     location: "Jazz Club Downtown",
     capacity: 100,
     event_category_id: 1,
+    status: "published"
   },
   {
     name: "Tech Workshop",
@@ -14,6 +15,7 @@ module.exports = [
     location: "Tech Hub",
     capacity: 50,
     event_category_id: 2,
+    status: "published"
   },
   {
     name: "Business Conference",
@@ -22,5 +24,6 @@ module.exports = [
     location: "Conference Center",
     capacity: 200,
     event_category_id: 3,
+    status: "published"
   },
 ];

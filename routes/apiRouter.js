@@ -1,12 +1,6 @@
 const apiRouter = require('express').Router();
+const eventsRouter = require('./eventsRouter');
 
-const placeHolder =  async (req, res, next) => {
-  try {
-    res.status(200).send({msg:"hello world"})
-  }
-  catch {
-    next
-  }
-}
+apiRouter.use('/events', eventsRouter)
 
-apiRouter.use('/', placeHolder)
+module.exports = apiRouter
