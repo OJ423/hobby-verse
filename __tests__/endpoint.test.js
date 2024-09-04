@@ -268,3 +268,133 @@ describe("Events", () => {
     })
   })
 })
+
+
+describe.only("Categories", () => {
+  // GET EVENTS
+  it("responds with all categories", () => {
+    return request(app)
+    .get("/api/categories/")
+    .expect(200)
+    .then(({body}) => {
+      expect(body.categories.length).toBe(3)
+      expect(body.categories[0].name).toBe("Music")
+      expect(body.categories[2].description).toBe("Business and tech conferences")
+    })
+  })
+  it("responds with a single category", () => {
+    return request(app)
+    .get("/api/categories/1")
+    .expect(200)
+    .then(({body}) => {
+        const { category } = body
+      expect(category.name).toBe("Music")
+      expect(category.description).toBe("Live music events")
+    })
+  })
+  it("responds 404 for non-existent category", () => {
+    return request(app)
+    .get("/api/categories/11")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("This category does not exist")
+    })
+  })
+  it("responds 400 for invalid request", () => {
+    return request(app)
+    .get("/api/categories/one")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe("Invalid data type")
+    })
+  })
+
+  // ADD CATEGORIES
+  it("adds a category if the user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post("/api/categories/new")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      name: "Arts and Crafts",
+      description: "Get creative with our arts and crafts events",
+    })
+    .expect(201)
+    .then(({body}) => {
+      expect(body.category.name).toBe("Arts and Crafts")
+      expect(body.category.description).toBe("Get creative with our arts and crafts events")
+    })
+  })
+  it("adds a category if the user is staff", () => {
+    const token = jwt.sign(
+      { id: 2, name: "Staff User 1" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post("/api/categories/new")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      name: "Arts and Crafts",
+      description: "Get creative with our arts and crafts events",
+    })
+    .expect(201)
+    .then(({body}) => {
+      expect(body.category.name).toBe("Arts and Crafts")
+      expect(body.category.description).toBe("Get creative with our arts and crafts events")
+    })
+  })
+  it("reject a new category if the user is a customer", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post("/api/categories/new")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      name: "Arts and Crafts",
+      description: "Get creative with our arts and crafts events",
+    })
+    .expect(401)
+    .then(({body}) => {
+      expect(body.msg).toBe("You are unauthorized to add an event")
+    })
+  })
+
+  // EDIT CATEGORIES
+  it("edits a category if user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .patch("/api/categories/edit/1")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      name: "Music Nights",
+    })
+    .expect(200)
+    .then(({body}) => {
+      expect(body.category.name).toBe("Music Nights")
+    })
+  })
+  // DELETE CATEGORIES
+  it("deletes an event if user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .delete("/api/categories/delete/1")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.msg).toBe("Category deleted")
+      expect(body.category.name).toBe("Music")
+      expect(body.category.description).toBe("Live music events")
+    })
+  })
+})
