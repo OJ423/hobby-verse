@@ -8,6 +8,7 @@ const testData = require("../db/data/test-data/index.js");
 const bcrypt = require("bcryptjs/dist/bcrypt.js");
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const PASS_RESET = process.env.PASS_RESET;
 
 beforeEach(() => seedTest(testData));
 afterAll(() => db.end());
@@ -528,7 +529,7 @@ describe("Tickets", () => {
   })
 })
 
-describe.only("Event Tickets", () => {
+describe("Event Tickets", () => {
   // ADD EVENT TICKETS
   it("adds event tickets in the user is staff or admin", () => {
     const token = jwt.sign(
@@ -655,4 +656,187 @@ describe.only("Event Tickets", () => {
     })
   })
 })
+
+describe.only("Users", () => {
+  // REGISTRATION
+  it("should register a user, send a verification email, and verify the user email", () => {
+    return request(app)
+      .post("/api/users/register")
+      .send({
+        name: "Ambass01",
+        email: "ambass@example.com",
+        password: "hoot@hoot.hoot",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          "User registered successfully. Please check your email to verify your account."
+        );
+
+        // Simulate receiving the token (in a real test, this would come from the email)
+        const verificationToken = jwt.sign(
+          { id: 6, name: "Ambass01" },
+          process.env.JWT_SECRET,
+          { expiresIn: "1h" }
+        );
+        return request(app)
+          .get(`/api/users/verify-email?token=${verificationToken}`)
+          .expect(200);
+      })
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          "Email verified successfully. Your account is now active."
+        );
+      });
+  });
+  // LOGIN 
+  it("logs a user in by email address returning their details", () => {
+    return request(app)
+      .post("/api/users/login")
+      .send({
+        email: "customer1@example.com",
+        password: "customerhash123",
+      })
+      .expect(200)
+      .then(({ body }) => {
+        const user = body.user;
+        expect(user.name).toBe("Customer User 1");
+        expect(user.email).toBe(
+          "customer1@example.com"
+        );
+      });
+  });
+  it("provides a message when incorrect password is used", () => {
+    return request(app)
+      .post("/api/users/login")
+      .send({
+        email: "customer1@example.com",
+        password: "RunnerGirl779",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Passwords do not match. Please try again.");
+      });
+  });
+  it("lets the user know that they cannot by found", () => {
+    return request(app)
+      .post("/api/users/login")
+      .send({
+        email: "sarahsmith@example.con",
+        password: "RunnerGirl779",
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("User not found");
+      });
+  });
+
+  // Forgot Password Tests
+
+  it("should let a user request an email to reset their password", () => {
+
+    return request(app)
+      .post("/api/users/forgot-password")
+      .send({
+        email: "staff1@example.com",
+      })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          "Please check your email to change your password."
+        );
+
+        // Simulate receiving the token (in a real test, this would come from the email)
+        const verificationToken = jwt.sign(
+          { email:"staff1@example.com" },
+          PASS_RESET,
+          { expiresIn: "15m" }
+        );
+        return request(app)
+          .post(`/api/users/update-password?token=${verificationToken}`)
+          .send({
+            password: "password321",
+          })
+          .expect(201);
+      })
+      .then(({ body }) => {
+        expect(body.msg).toBe("You password has been changed successfully.");
+        return bcrypt.compare("password321", body.user.password_hash).then((isMatch) => {
+          expect(isMatch).toBe(true);
+        });
+      })
+  });
+  it("should reject a password change with an incorrect token", () => {
+    return request(app)
+      .post("/api/users/forgot-password")
+      .send({
+        email: "staff1@example.com",
+      })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          "Please check your email to change your password."
+        );
+
+        // Simulate receiving the token (in a real test, this would come from the email)
+        const invalidToken = jwt.sign(
+          { email: "staff1@example.com" },
+          "invalid token",
+          { expiresIn: "5m" }
+        );
+        return request(app)
+          .post(`/api/users/update-password?token=${invalidToken}`)
+          .send({
+            password: "password321",
+          })
+          .expect(400);
+      })
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          "Error verifying user: JsonWebTokenError: invalid signature"
+        );
+      });
+  });
+
+  // PATCH USER
+
+  it("should Patch / Edit a user", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .patch("/api/users/edit/1")
+      .send({
+        name: "Oliver Bond",
+      })
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.user.name).toBe("Oliver Bond");
+        expect(body.user.email).toBe("admin@example.com");
+      });
+  });
+
+  // DELETE USER
+
+  it("should delete user with appropriate token", () => {
+    token = jwt.sign(
+      { id: 2, name: "Staff User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .delete("/api/users/delete/2")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe("User deleted.");
+
+      })
+  });
+})
+
+
 
