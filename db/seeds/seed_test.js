@@ -31,6 +31,7 @@ const seedTest = async ({
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         role VARCHAR(50) CHECK (role IN ('customer', 'staff', 'admin')) NOT NULL,
+        verified BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       )`);
@@ -103,12 +104,12 @@ const seedTest = async ({
 
     const insertUsers = format (`
       INSERT INTO users (
-        name, email, password_hash, role)
+        name, email, password_hash, role, verified)
         VALUES %L`,
-      userData.map(({name, email, password_hash, role}) => {
+      userData.map(({name, email, password_hash, role, verified}) => {
         // encrypt password
         const encryptedPassword = hashPasswords(password_hash)
-        return [name, email, encryptedPassword, role]
+        return [name, email, encryptedPassword, role, verified]
       })
     );
 
