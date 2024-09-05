@@ -28,7 +28,7 @@ module.exports = [
     updated_at: new Date(),
   },
   {
-    event_id: 3,
+    event_id: 2,
     ticket_id: 5,
     quantity: 100,
     created_at: new Date(),

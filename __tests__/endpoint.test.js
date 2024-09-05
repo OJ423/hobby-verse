@@ -399,7 +399,7 @@ describe("Categories", () => {
   })
 })
 
-describe.only("Tickets", () => {
+describe("Tickets", () => {
   // GET TICKETS
   it("responds with all tickets for admin", () => {
     const token = jwt.sign(
@@ -527,3 +527,132 @@ describe.only("Tickets", () => {
     })
   })
 })
+
+describe.only("Event Tickets", () => {
+  // ADD EVENT TICKETS
+  it("adds event tickets in the user is staff or admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post("/api/event-tickets/new")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      event_id: 1,
+      ticket_id: 4,
+      quantity: 20
+    })
+    .expect(201)
+    .then(({body}) => {
+      expect(body.eventTickets.event_id).toBe(1)
+      expect(body.eventTickets.ticket_id).toBe(4)
+      expect(body.eventTickets.quantity).toBe(20)
+    })
+  })
+  it("stops event tickets being added if they exceed the event capacity", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post("/api/event-tickets/new")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      event_id: 1,
+      ticket_id: 4,
+      quantity: 40
+    })
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe("Ticket allocation exceeds event capacity. There is room for 40. Each ticket is for 2 heads meaning the quantity being issued is equal to 80 heads")
+    })
+  })
+  it("stops customers from adding event tickets", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post("/api/event-tickets/new")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      event_id: 1,
+      ticket_id: 4,
+      quantity: 20
+    })
+    .expect(401)
+    .then(({body}) => {
+      expect(body.msg).toBe("You are unauthorized to add event tickets")
+    })
+  })
+  // EDIT EVENT TICKETS
+  it("edits event tickets if user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .patch("/api/event-tickets/edit/2")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      event_id: 1,
+      ticket_id: 2,
+      quantity: 20,
+    })
+    .expect(200)
+    .then(({body}) => {
+      expect(body.eventTickets.quantity).toBe(20)
+      expect(body.eventTickets.event_id).toBe(1)
+    })
+  })
+  it("prevents ticket allocation exceeding event capacity", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .patch("/api/event-tickets/edit/2")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      event_id: 1,
+      ticket_id: 2,
+      quantity: 60,
+    })
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe("Ticket allocation exceeds event capacity. There is room for 40. Each ticket is for 1 heads meaning the quantity being issued is equal to 60 heads")
+    })
+  })
+
+  // DELETE EVENT TICKETS
+
+  it("deletes a event tickets if user is admin or staff", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .delete("/api/event-tickets/delete/1")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.msg).toBe("Event tickets deleted")
+    })
+  })
+
+  it("stops customers deleting event tickets", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .delete("/api/event-tickets/delete/1")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(401)
+    .then(({body}) => {
+      expect(body.msg).toBe("You are unauthorized to delete these event tickets")
+    })
+  })
+})
+
