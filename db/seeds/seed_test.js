@@ -80,11 +80,9 @@ const seedTest = async ({
     await db.query(`
       CREATE TABLE orders (
         id SERIAL PRIMARY KEY, 
-        event_ticket_id INT REFERENCES event_tickets(id) ON DELETE SET NULL,
         user_id INT REFERENCES users(id) ON DELETE SET NULL,
         customer_name VARCHAR(255) NOT NULL,
         customer_email VARCHAR(255) NOT NULL,
-        quantity INT NOT NULL,
         total_amount NUMERIC(10, 2) NOT NULL,
         payment_status VARCHAR(50) DEFAULT 'Pending',
         created_at TIMESTAMP DEFAULT NOW(),
@@ -95,6 +93,7 @@ const seedTest = async ({
         id SERIAL PRIMARY KEY,
         order_id INT REFERENCES orders(id) ON DELETE CASCADE, 
         event_ticket_id INT REFERENCES event_tickets(id) ON DELETE CASCADE,
+        ticket_price NUMERIC(10, 2),
         quantity INT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
@@ -169,10 +168,10 @@ const seedTest = async ({
 
     const insertOrders = format(`
       INSERT INTO orders
-      (event_ticket_id, user_id, customer_name, customer_email, quantity, total_amount, payment_status)
+      (user_id, customer_name, customer_email, total_amount, payment_status)
       VALUES %L`,
-      ordersData.map(({event_ticket_id, user_id, customer_name, customer_email, quantity, total_amount, payment_status}) => {
-        return [event_ticket_id, user_id, customer_name, customer_email, quantity, total_amount, payment_status]
+      ordersData.map(({user_id, customer_name, customer_email, total_amount, payment_status}) => {
+        return [user_id, customer_name, customer_email, total_amount, payment_status]
       })
     )
 
@@ -182,10 +181,10 @@ const seedTest = async ({
 
     const insertOrderItems = format(`
       INSERT INTO order_items
-      (order_id, event_ticket_id, quantity)
+      (order_id, event_ticket_id, ticket_price, quantity)
       VALUES %L`,
-      orderItemsData.map(({order_id, event_ticket_id, quantity}) => {
-        return [order_id, event_ticket_id, quantity]
+      orderItemsData.map(({order_id, event_ticket_id, ticket_price, quantity}) => {
+        return [order_id, event_ticket_id, ticket_price, quantity]
       })
     )
 

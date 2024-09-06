@@ -10,7 +10,7 @@ const bcrypt = require("bcryptjs/dist/bcrypt.js");
 const JWT_SECRET = process.env.JWT_SECRET;
 const PASS_RESET = process.env.PASS_RESET;
 
-beforeEach(() => seedTest(testData));
+beforeEach(async() => await seedTest(testData));
 afterAll(() => db.end());
 
 describe("Events", () => {
@@ -269,7 +269,6 @@ describe("Events", () => {
     })
   })
 })
-
 
 describe("Categories", () => {
   // GET EVENTS
@@ -657,7 +656,7 @@ describe("Event Tickets", () => {
   })
 })
 
-describe.only("Users", () => {
+describe("Users", () => {
   // REGISTRATION
   it("should register a user, send a verification email, and verify the user email", () => {
     return request(app)
@@ -836,6 +835,164 @@ describe.only("Users", () => {
 
       })
   });
+})
+
+describe.only("Orders", () => {
+  // ADD ORDER
+  it("adds an event order and its order items", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .post('/api/orders/new')
+    .send({
+      total_amount: 175.00,
+      payment_status: 'complete',
+      order_items: [
+        {
+          event_ticket_id:2,
+          ticket_price:100,
+          quantity:2,
+        },
+        {
+          event_ticket_id:4,
+          ticket_price: 75.00,  
+          quantity:2,
+        }
+      ]     
+    })
+    .set("Authorization", `Bearer ${token}`)
+    .expect(201)
+    .then(({body}) => {
+      const { order, orderItems } = body.order
+      
+      expect(order.id).toBe(5)
+      expect(order.user_id).toBe(4)
+      expect(order.customer_name).toBe("Customer User 1")
+      expect(order.customer_email).toBe("customer1@example.com")
+      expect(orderItems[0].event_name).toBe("Jazz Night")
+      expect(orderItems[0].event_date).toBe("2024-10-10T17:00:00.000Z")
+      expect(orderItems[0].ticket_quantity).toBe(2)      
+      expect(orderItems[0].ticket_name).toBe("VIP Admission")
+      expect(orderItems[0].ticket_description).toBe("VIP seating and backstage access")
+      expect(orderItems[0].ticket_price).toBe("100.00")
+      expect(orderItems[0].heads_per_ticket).toBe(1)      
+    })
+  })
+
+  // DELETE ORDER ITEM
+  it("deletes an order item from an order if the user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .delete('/api/orders/order-item/5')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.msg).toBe("Order item deleted")
+      expect(body.orderItem.id).toBe(5)
+      expect(body.orderItem.ticket_price).toBe("100.00")
+      expect(body.newOrderTotal).toBe("100.00")
+    })
+  })
+  it("stops an order item delete if the user is staff", () => {
+    const token = jwt.sign(
+      { id: 2, name: "Shop User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .delete('/api/orders/order-item/5')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(401)
+    .then(({body}) => {
+      expect(body.msg).toBe("You are not authorised to delete this order item")
+    })
+  })
+  // DELETE ORDER ITEM
+  it("deletes an order and associated order items, adding back to the event ticket quantity if the user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .delete('/api/orders/1')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.msg).toBe('Order deleted')
+      expect(body.order.id).toBe(1)
+    })
+  })
+
+  // GET ALL ORDERS
+  it("gets all orders if the user is admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get('/api/orders')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.orders.length).toBe(4)
+      expect(body.orders[0].customer_name).toBe("Customer User 1")
+    })
+  })
+  it("prevents customers accessing all orders", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get('/api/orders')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(401)
+    .then(({body}) => {
+      expect(body.msg).toBe("You are unauthorized to view all tickets")
+    })
+  })
+  // GET ORDERS BY USER
+  it("gets all orders by user", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get('/api/orders/user')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.orders.length).toBe(2)
+      expect(body.orders[0].customer_name).toBe("Customer User 1")
+    })
+  })
+  // GET SINGLE ORDERS WITH USER CHECK
+  it("gets single order with order_items", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get('/api/orders/1')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.order.id).toBe(1)
+      expect(body.orderItems.length).toBe(2)
+    })
+  })
 })
 
 
