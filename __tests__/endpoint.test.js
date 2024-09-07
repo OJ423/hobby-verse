@@ -837,7 +837,7 @@ describe("Users", () => {
   });
 })
 
-describe.only("Orders", () => {
+describe("Orders", () => {
   // ADD ORDER
   it("adds an event order and its order items", () => {
     const token = jwt.sign(
@@ -992,6 +992,132 @@ describe.only("Orders", () => {
       expect(body.order.id).toBe(1)
       expect(body.orderItems.length).toBe(2)
     })
+  })
+})
+
+describe.only("Staff & Admin Management", () => {
+  // ADD STAFF MEMBER
+  it("lets an admin add a user as staff", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .patch("/api/users/admin")
+      .send({
+        email: "customer1@example.com",
+        role: "staff",
+      })
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Customer User 1 is now staff")
+      })
+  })
+  it("lets an admin add a user as admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .patch("/api/users/admin")
+      .send({
+        email: "customer1@example.com",
+        role: "admin",
+      })
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Customer User 1 is now admin")
+      })
+  })
+  it("lets prevents staff from user management", () => {
+    const token = jwt.sign(
+      { id: 2, name: "Staff User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .patch("/api/users/admin")
+      .send({
+        email: "customer1@example.com",
+        role: "staff",
+      })
+      .set("Authorization", `Bearer ${token}`)
+      .expect(401)
+      .then(({ body }) => {
+        expect(body.msg).toBe("You are not authorised to perform this action")
+      })
+  })
+  it("lets prevents customers from user management", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .patch("/api/users/admin")
+      .send({
+        email: "customer1@example.com",
+        role: "staff",
+      })
+      .set("Authorization", `Bearer ${token}`)
+      .expect(401)
+      .then(({ body }) => {
+        expect(body.msg).toBe("You are not authorised to perform this action")
+      })
+  })
+  it("returns 404 for users not in the database", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .patch("/api/users/admin")
+      .send({
+        email: "carl@carlsworld.com",
+        role: "staff",
+      })
+      .set("Authorization", `Bearer ${token}`)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No user found with this email address")
+      })
+  })
+  it("lets an admin add a user as staff", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .patch("/api/users/admin")
+      .send({
+        email: "customer1@example.com",
+        role: "customer",
+      })
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Customer User 1 is now customer")
+      })
+  })
+  it("lets admin get all staff and admin", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+      .get("/api/users/admin")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.users.length).toBe(3)
+      })
   })
 })
 

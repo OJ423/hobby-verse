@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { createNewUser, verifyNewUser, loginUserIn, verifyUserUpdatePassword, editUser, removeUser } = require("../models/users_models");
+const { createNewUser, verifyNewUser, loginUserIn, verifyUserUpdatePassword, editUser, removeUser, addAdminStaff, fetchAdminStaff } = require("../models/users_models");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/user_emails");
 const { checkUserForPasswordReset } = require("../utils/helper_functions");
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -11,7 +11,7 @@ exports.registerUser = async (req, res, next) => {
     
     const newUser = await createNewUser(body)
     
-    const verificationToken = jwt.sign({ id: newUser.id, name: newUser.name }, JWT_SECRET, { expiresIn: '15m' });
+    const verificationToken = await jwt.sign({ id: newUser.id, name: newUser.name }, JWT_SECRET, { expiresIn: '15m' });
     
     await sendVerificationEmail(newUser.email, verificationToken);
     
@@ -71,7 +71,7 @@ exports.updateUserPassword = async (req, res, next) => {
     const { token } = req.query;
     const { body } = req;
     const user = await verifyUserUpdatePassword(body, token)
-    const newToken = jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
+    const newToken = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
     res.status(201).send({msg: 'You password has been changed successfully.', user, token: newToken})
   } 
   catch(err) {
@@ -84,7 +84,8 @@ exports.patchUser = async (req, res, next) => {
     const { id } = req.params;
     const { body } = req;
     const user = await editUser(id, body)
-    res.status(200).send({ user })
+    const token = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
+    res.status(200).send({ user, token })
   }
   catch(err) {
     next(err)
@@ -95,7 +96,34 @@ exports.deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params
     const user = await removeUser(id)
-    res.status(200).send({msg: 'User deleted.', user})
+    const token = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
+    res.status(200).send({msg: 'User deleted.', user, token})
+  }
+  catch(err) {
+    next(err)
+  }
+}
+
+exports.patchAdminStaff = async (req, res, next) => {
+  try {
+    const { user, body } = req;
+    const newRole = await addAdminStaff(user.id, body)
+    const token = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
+
+    res.status(200).send({msg: `${newRole.name} is now ${newRole.role}`, token})
+  }
+  catch(err) {
+    next(err)
+  }
+}
+
+exports.getAdminStaff = async (req, res, next) => {
+  try {
+    const { user } = req;
+    const users = await fetchAdminStaff(user.id);
+    const token = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
+    console.log(users)
+    res.status(200).send({users, token})
   }
   catch(err) {
     next(err)
