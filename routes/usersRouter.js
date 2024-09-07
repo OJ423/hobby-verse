@@ -1,4 +1,4 @@
-const { registerUser, verifyUser, loginUserByEmail, forgotPasswordRequest, updateUserPassword, patchUser, deleteUser } = require('../controllers/users_controllers')
+const { registerUser, verifyUser, loginUserByEmail, forgotPasswordRequest, updateUserPassword, patchUser, deleteUser, patchAdminStaff, getAdminStaff } = require('../controllers/users_controllers')
 const { authUserCrudOps } = require('../middlewares/authCrudOps')
 const { authMiddleware } = require('../middlewares/authMiddleware')
 
@@ -18,7 +18,12 @@ usersRouter.post('/update-password', updateUserPassword)
 // Patch User
 usersRouter.patch('/edit/:id', authMiddleware, authUserCrudOps, patchUser)
 
-// Delte User
+// Delete User
 usersRouter.delete('/delete/:id', authMiddleware, authUserCrudOps, deleteUser)
+
+// Staff/Admin Management
+usersRouter.get('/admin', authMiddleware, getAdminStaff)
+usersRouter.patch('/admin', authMiddleware, patchAdminStaff)
+
 
 module.exports = usersRouter;

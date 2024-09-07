@@ -142,3 +142,64 @@ exports.removeUser = async (id) => {
     throw err
   } 
 }
+
+// STAFF & ADMIN MANAGEMENT
+
+exports.addAdminStaff = async ( userId, {email, role} ) => {
+  try {
+    // Admin request check
+    const { rows: requester } = await db.query(`
+      SELECT * FROM users
+      WHERE id = $1`, [userId])
+
+    if (!requester.length || (requester[0].role === "customer" || requester[0].role === "staff")) {
+      return Promise.reject({msg: "You are not authorised to perform this action", status:401})
+    }
+  
+    // Add admin/staff
+  
+    const { rows: newRole } = await db.query(`
+      UPDATE users
+      SET role = $1
+      WHERE email = $2
+      RETURNING *`, [role, email])
+    
+    if (!newRole.length) {
+      return Promise.reject({msg: "No user found with this email address", status:404})
+    }
+  
+    return newRole[0]
+  }
+  catch(err) {
+    throw err
+  }
+}
+
+exports.fetchAdminStaff = async ( userId ) => {
+  try {
+    // Admin request check
+    const { rows: requester } = await db.query(`
+      SELECT * FROM users
+      WHERE id = $1`, [userId])
+
+    if (!requester.length || (requester[0].role === "customer" || requester[0].role === "staff")) {
+      return Promise.reject({msg: "You are not authorised to perform this action", status:401})
+    }
+  
+    // Get admin/staff
+  
+    const { rows: users } = await db.query(`
+      SELECT * FROM users
+      WHERE role IN ('staff', 'admin');`)
+    
+    if (!users.length) {
+      return Promise.reject({msg: "There are no staff and admin users", status:404})
+    }
+  
+    return users
+  }
+  catch(err) {
+    throw err
+  }
+
+}
