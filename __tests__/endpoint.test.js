@@ -268,6 +268,24 @@ describe("Events", () => {
       expect(body.msg).toBe("You are unauthorized to delete this event")
     })
   })
+  // GET EVENT ATTENDEES
+  it.only("gets event attendees if u", () => {
+    const token = jwt.sign(
+      { id: 1, name: "Admin User" }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get("/api/events/attendees/2")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      console.log(body.attendees)
+      expect(body.attendees.length).toBe(4)
+      expect(body.attendees[0].customer_name).toBe("Customer User 1")
+      expect(body.attendees[0].ticket_name).toBe("Early Bird")
+      expect().toBe()
+    })
+  })
 })
 
 describe("Categories", () => {
@@ -654,6 +672,18 @@ describe("Event Tickets", () => {
       expect(body.msg).toBe("You are unauthorized to delete these event tickets")
     })
   })
+
+  // GET EVENT TICKETS AND TICKET INFO BY EVENT
+  it("gets event tickets and ticket info by event ID", () => {
+    return request(app)
+    .get("/api/event-tickets/1")
+    .expect(200)
+    .then(({body}) => {
+      expect(body.eventTickets.length).toBe(2)
+      expect(body.eventTickets[0].name).toBe("General Admission")
+      expect(body.eventTickets[0].quantity).toBe(50)
+    })
+  })
 })
 
 describe("Users", () => {
@@ -995,7 +1025,7 @@ describe("Orders", () => {
   })
 })
 
-describe.only("Staff & Admin Management", () => {
+describe("Staff & Admin Management", () => {
   // ADD STAFF MEMBER
   it("lets an admin add a user as staff", () => {
     const token = jwt.sign(
@@ -1120,6 +1150,3 @@ describe.only("Staff & Admin Management", () => {
       })
   })
 })
-
-
-
