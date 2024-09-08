@@ -164,3 +164,22 @@ exports.removeEventTickets = async ( userId, eventTicketsId) => {
   }
 
 }
+
+// GET EVENT TICKETS FOR EVENT
+
+exports.fetchEventTickets = async (eventId) => {
+  try {
+
+    const { rows } = await db.query(`
+      SELECT et.*, t.name, t.description, t.limitations, t.qty_tickets AS ticket_head_count, t.price, t.is_free
+      FROM event_tickets et
+      JOIN tickets t ON et.ticket_id = t.id
+      WHERE et.event_id = $1`, [eventId])
+    
+    return rows
+
+  }
+  catch(err) {
+    throw err
+  }
+}

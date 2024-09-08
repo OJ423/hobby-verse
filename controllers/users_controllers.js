@@ -122,7 +122,6 @@ exports.getAdminStaff = async (req, res, next) => {
     const { user } = req;
     const users = await fetchAdminStaff(user.id);
     const token = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
-    console.log(users)
     res.status(200).send({users, token})
   }
   catch(err) {

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { insertEventTickets, editEventTickets, removeEventTickets } = require("../models/event_tickets.models");
+const { insertEventTickets, editEventTickets, removeEventTickets, fetchEventTickets } = require("../models/event_tickets.models");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.postEventTickets = async (req, res, next) => {
@@ -43,6 +43,17 @@ exports.deleteEventTickets = async (req, res, next) => {
       { expiresIn: "15m" }
     );
     res.status(200).send({msg: "Event tickets deleted", eventTickets, token})
+  }
+  catch(err) {
+    next(err)
+  }
+}
+
+exports.getEventTickets = async (req, res, next) => {
+  try {
+    const { eventId } = req.params;
+    const eventTickets = await fetchEventTickets(eventId);
+    res.status(200).send({eventTickets})
   }
   catch(err) {
     next(err)

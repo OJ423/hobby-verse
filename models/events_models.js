@@ -138,3 +138,48 @@ exports.removeEvent = async ( userId, eventId) => {
     throw(err)
   }
 }
+
+// GET EVENT ATTENDEES
+
+exports.fetchEventAttendees = async (userId, eventId) => {
+  try {
+    // Check user is staff or admin
+    const { rows: authCheck } = await db.query(`
+      SELECT role FROM users
+      WHERE id = $1`, [userId])
+    
+    if (authCheck[0].role === "customer" || !authCheck.length) {
+      return Promise.reject({msg: "You are not authorised to see this.", status: 401})
+    }
+
+    const { rows: attendees } = await db.query(`
+      SELECT 
+        e.id AS event_id,
+        e.name AS event_name,
+        u.id AS customer_id,
+        u.name AS customer_name,
+        u.email AS customer_email,
+        t.name AS ticket_name,
+        oi.ticket_price AS ticket_cost,
+        oi.quantity AS ticket_quantity
+      FROM 
+        orders o
+      JOIN 
+        order_items oi ON o.id = oi.order_id
+      JOIN 
+        event_tickets et ON oi.event_ticket_id = et.id
+      JOIN
+        events e ON et.event_id = e.id
+      JOIN 
+        tickets t ON et.ticket_id = t.id
+      JOIN 
+        users u ON o.user_id = u.id
+      WHERE 
+        et.event_id = $1;`, [eventId])
+    
+    return attendees
+  }
+  catch(err) {
+    throw err
+  }
+}
