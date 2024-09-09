@@ -11,7 +11,7 @@ exports.postOrder = async (req, res, next) => {
       { id: user.id, name: user.name }, JWT_SECRET,
       { expiresIn: "15m" }
     );
-    orderConfirmationEmail(order)
+    await orderConfirmationEmail(order)
     res.status(201).send({order, token})
   }
   catch(err) {

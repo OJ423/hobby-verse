@@ -7,10 +7,10 @@ const ordersRouter = require('express').Router()
 ordersRouter.post('/new', authMiddleware, postOrder)
 
 // Delete Order Item
-ordersRouter.delete('/order-item/:orderItemId', authMiddleware, deleteOrderItem)
+ordersRouter.delete('/delete/order-item/:orderItemId', authMiddleware, deleteOrderItem)
 
 // Delete Order
-ordersRouter.delete('/:orderId', authMiddleware, deleteOrder)
+ordersRouter.delete('/delete/:orderId', authMiddleware, deleteOrder)
 
 // Get Orders
 ordersRouter.get('/', authMiddleware, getOrders)

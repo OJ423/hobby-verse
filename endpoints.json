@@ -1,0 +1,731 @@
+{
+  "GET /api/": {
+    "description": "serves up a json representation of all the available endpoints of the api"
+  },
+  "POST /api/users/register": {
+    "description": "posts a user with an unverified status and sends a validate email with JWT token",
+    "queries": [],
+    "inputBodyExample": {
+      "name": "Carl Carlson",
+      "email": "email@email.com",
+      "password": "eorijferoifjw"
+    },
+    "exampleResponse": {
+      "articles": [
+        {
+          "msg": "User registered successfully. Please check your email to verify your account."
+        }
+      ]
+    }
+  },
+  "get /api/users/verify-email": {
+    "description": "Uses the email token to update the user validated status.",
+    "queries": [],
+
+    "exampleResponse": {
+      "msg": "Email verified successfully. Your account is now active.",
+      "user": {
+        "id": 12,
+        "name": "Person Name",
+        "email": "email@email.com",
+        "password": "d324dsd342sfksdjfkldsj",
+        "role": "customer",
+        "verified": true,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+
+  "POST /api/users/login": {
+    "description": "Logins in a user responding with their details and a JWT token",
+    "queries": [],
+    "inputBodyExample": {
+      "email": "email@email.com",
+      "password": "eorijferoifjw"
+    },
+    "exampleResponse": {
+      "user": {
+        "id": 12,
+        "name": "Person Name",
+        "email": "email@email.com",
+        "password": "d324dsd342sfksdjfkldsj",
+        "role": "customer",
+        "verified": true,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "POST /api/users/forgot-password": {
+    "description": "Sends an email to reset the password with JWT auth check",
+    "queries": [],
+    "inputBodyExample": {
+      "email": "email@email.com"
+    },
+    "exampleResponse": {
+      "msg": "Please check your email to change your password."
+    }
+  },
+  "POST /api/users/update-password": {
+    "description": "Sends an email to reset the password with JWT auth check",
+    "queries": [],
+    "inputBodyExample": {
+      "password": "SomethingSecure1!"
+    },
+    "exampleResponse": {
+      "msg": "Your password has been changed successfully.",
+      "user": {
+        "id": 12,
+        "name": "Person Name",
+        "email": "email@email.com",
+        "password": "d324dsd342sfksdjfkldsj",
+        "role": "customer",
+        "verified": true,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "PATCH /api/users/edit/:id": {
+    "description": "Sends an email to reset the password with JWT auth check",
+    "queries": [],
+    "header": "JWT Token",
+    "inputBodyExample": {
+      "name": "Karl WithaK",
+      "email": "karlk@carlsworld.com"
+    },
+    "exampleResponse": {
+      "user": {
+        "id": 12,
+        "name": "Karl WithaK",
+        "email": "karlk@carlsworld.com",
+        "password": "d324dsd342sfksdjfkldsj",
+        "role": "customer",
+        "verified": true,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "DELETE /api/users/:id": {
+    "description": "Enables a user to delete them self from the app",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg": "User deleted",
+      "user": {
+        "id": 12,
+        "name": "Karl WithaK",
+        "email": "karlk@carlsworld.com",
+        "password": "d324dsd342sfksdjfkldsj",
+        "role": "customer",
+        "verified": true,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/users/admin": {
+    "description": "Lists all staff and admin users",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "users": [
+        {
+          "id": 12,
+          "name": "Karl WithaK",
+          "email": "karlk@carlsworld.com",
+          "password": "d324dsd342sfksdjfkldsj",
+          "role": "staff",
+          "verified": true,
+          "created_at": "2024-06-14T10:10:36.851Z",
+          "updated_at": "2024-06-14T10:10:36.851Z"
+        }
+      ],
+      "token": "JWT Token"
+    }
+  },
+  "PATCH /api/users/admin": {
+    "description": "Change a users role based on their email address",
+    "inputBodyExample": {
+      "email": "karlk@carlsworld.com",
+      "role": "staff"
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg": "Karl WithaK is now staff",
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/events/": {
+    "description": "Gets all published events",
+    "queries": ["category"],
+    "exampleResponse": {
+      "events": [
+        {
+          "id": 4,
+          "name": "Event Name",
+          "description": "Event desc",
+          "date": "2024-06-14T10:10:36.851Z",
+          "location": "At the cafe",
+          "capacity": 50,
+          "event_category_id": 2,
+          "created_at": "2024-06-14T10:10:36.851Z",
+          "updated_at": "2024-06-14T10:10:36.851Z",
+          "img": "https://imageurl.com/image.jpg",
+          "status": "published"
+        }
+      ]
+    }
+  },
+  "GET /api/events/:id": {
+    "description": "Gets a single event by ID",
+    "queries": [],
+    "exampleResponse": {
+      "event": {
+        "id": 4,
+        "name": "Event Name",
+        "description": "Event desc",
+        "date": "2024-06-14T10:10:36.851Z",
+        "location": "At the cafe",
+        "capacity": 50,
+        "event_category_id": 2,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z",
+        "img": "https://imageurl.com/image.jpg",
+        "status": "published"
+      }
+    }
+  },
+  "POST /api/events/new": {
+    "description": "Lets staff or admin add an event",
+    "inputBodyExample": {
+      "id": 4,
+      "name": "Event Name",
+      "description": "Event desc",
+      "date": "2024-06-14T10:10:36.851Z",
+      "location": "At the cafe",
+      "capacity": 50,
+      "event_category_id": 2,
+      "img": "https://imageurl.com/image.jpg",
+      "status": "draft"
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "event": {
+        "name": "Event Name",
+        "description": "Event desc",
+        "date": "2024-06-14T10:10:36.851Z",
+        "location": "At the cafe",
+        "capacity": 50,
+        "event_category_id": 2,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z",
+        "img": "https://imageurl.com/image.jpg",
+        "status": "published"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "PATCH /api/events/edit/:eventId": {
+    "description": "Lets staff or admin edit an event",
+    "inputBodyExample": {
+      "name": "Event Name",
+      "description": "Event desc",
+      "date": "2024-06-14T10:10:36.851Z",
+      "location": "At the cafe",
+      "capacity": 50,
+      "event_category_id": 2,
+      "img": "https://imageurl.com/image.jpg",
+      "status": "draft"
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "event": {
+        "id": 4,
+        "name": "Event Name",
+        "description": "Event desc",
+        "date": "2024-06-14T10:10:36.851Z",
+        "location": "At the cafe",
+        "capacity": 50,
+        "event_category_id": 2,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z",
+        "img": "https://imageurl.com/image.jpg",
+        "status": "published"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "DELETE /api/events/delete/:eventId": {
+    "description": "Lets staff or admin delete an event",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "event": {
+        "id": 4,
+        "name": "Event Name",
+        "description": "Event desc",
+        "date": "2024-06-14T10:10:36.851Z",
+        "location": "At the cafe",
+        "capacity": 50,
+        "event_category_id": 2,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z",
+        "img": "https://imageurl.com/image.jpg",
+        "status": "published"
+      },
+      "token": "JWT Token",
+      "msg": "Event deleted"
+    }
+  },
+  "GET /api/events/attendees/:eventId": {
+    "description": "Lets staff or admin get an event attendee list",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "attendees": [
+        {
+          "event_id": 2,
+          "event_name": "Garden Party",
+          "customer_id": 12,
+          "customer_name": "Karl WithaK",
+          "customer_email": "karlk@carlsworld.com",
+          "ticket_name": "General Admission",
+          "ticket_cost": 25.0,
+          "ticket_quantity": 2
+        }
+      ],
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/categories/": {
+    "description": "Gets all event categories",
+    "queries": [],
+    "exampleResponse": {
+      "categories": [
+        {
+          "id": 2,
+          "name": "Arts & Crafts",
+          "description": "Get your creativity on"
+        }
+      ],
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/categories/:categoryId": {
+    "description": "Get category by ID",
+    "queries": [],
+    "exampleResponse": {
+      "category": {
+        "id": 2,
+        "name": "Arts & Crafts",
+        "description": "Get your creativity on"
+      }
+    }
+  },
+  "POST /api/categories/new": {
+    "description": "Lets staff or admin add a category",
+    "inputBodyExample": {
+      "name": "New Category",
+      "Description": "Blow your mind"
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "category": {
+        "id": 26,
+        "name": "New Category",
+        "description": "Get your creativity on"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "PATCH /api/categories/edit/:categoryId": {
+    "description": "Lets staff or admin edit a category",
+    "inputBodyExample": {
+      "name": "New Category",
+      "Description": "Blow your mind"
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "category": {
+        "id": 26,
+        "name": "New Category",
+        "description": "Get your creativity on"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "DELETE /api/categories/delete/:categoryId": {
+    "description": "Lets staff or admin delete a category",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg": "Category deleted",
+      "category": {
+        "id": 26,
+        "name": "New Category",
+        "description": "Get your creativity on"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/tickets/": {
+    "description": "Gets all tickets",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "tickets": [
+        {
+          "id": 2,
+          "name": "Ticket Name",
+          "description": "Ticket description",
+          "limitations": "No children!",
+          "qty_tickets": "The number of heads per ticket",
+          "price": "Ticket cost",
+          "is_free": false,
+          "created_at": "2024-06-14T10:10:36.851Z",
+          "updated_at": "2024-06-14T10:10:36.851Z"
+        }
+      ],
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/tickets/:ticketId": {
+    "description": "Get single ticket",
+    "queries": [],
+    "exampleResponse": {
+      "ticket": {
+        "id": 2,
+        "name": "Ticket Name",
+        "description": "Ticket description",
+        "limitations": "No children!",
+        "qty_tickets": "The number of heads per ticket",
+        "price": "Ticket cost",
+        "is_free": false,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      }
+    }
+  },
+  "POST /api/tickets/new": {
+    "description": "Lets staff or admin add a new ticket",
+    "inputBodyExample": {
+      "name": "Ticket Name",
+      "description": "Ticket description",
+      "limitations": "No children!",
+      "qty_tickets": "The number of heads per ticket",
+      "price": "Ticket cost",
+      "is_free": false
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "ticket": {
+        "id": 2,
+        "name": "Ticket Name",
+        "description": "Ticket description",
+        "limitations": "No children!",
+        "qty_tickets": "The number of heads per ticket",
+        "price": "Ticket cost",
+        "is_free": false,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "PATCH /api/tickets/edit/ticketId": {
+    "description": "Lets staff or admin edit a new ticket",
+    "inputBodyExample": {
+      "name": "Ticket Name",
+      "description": "Ticket description",
+      "limitations": "No children!",
+      "qty_tickets": "The number of heads per ticket",
+      "price": "Ticket cost",
+      "is_free": false
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "ticket": {
+        "id": 2,
+        "name": "Ticket Name",
+        "description": "Ticket description",
+        "limitations": "No children!",
+        "qty_tickets": "The number of heads per ticket",
+        "price": "Ticket cost",
+        "is_free": false,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "DELETE /api/tickets/delete/ticketId": {
+    "description": "Lets staff or admin delete a new ticket",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg": "Ticket deleted",
+      "ticket": {
+        "id": 2,
+        "name": "Ticket Name",
+        "description": "Ticket description",
+        "limitations": "No children!",
+        "qty_tickets": "The number of heads per ticket",
+        "price": "Ticket cost",
+        "is_free": false,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "POST /api/event-tickets/new": {
+    "description": "Lets staff or admin add new event tickets",
+    "inputBodyExample": {
+      "event_id": 1,
+      "ticket_id": 3,
+      "quantity": 10
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "eventTickets": {
+        "id": 2,
+        "event_id": 1,
+        "ticket_id": 3,
+        "quantity": 10,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "PATCH /api/event-tickets/edit/:eventTicketsId": {
+    "description": "Lets staff or admin edit event tickets",
+    "inputBodyExample": {
+      "event_id": 1,
+      "ticket_id": 3,
+      "quantity": 10
+    },
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "eventTickets": {
+        "id": 2,
+        "event_id": 1,
+        "ticket_id": 3,
+        "quantity": 10,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "DELETE /api/event-tickets/delete/:eventTicketsId": {
+    "description": "Lets staff or admin delete event tickets",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg": "Event tickets deleted",
+      "eventTickets": {
+        "id": 2,
+        "event_id": 1,
+        "ticket_id": 3,
+        "quantity": 10,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/event-tickets/:eventId": {
+    "description": "Gets event tickets and ticket info for event",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg": "Event tickets deleted",
+      "eventTickets": {
+        "id": 2,
+        "event_id": 1,
+        "ticket_id": 3,
+        "quantity": 10,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z",
+        "name": "Ticket Name",
+        "description": "Ticket description",
+        "ticket_head_count": "Heads per ticket",
+        "price": 50.0,
+        "is_free": false
+      },
+      "token": "JWT Token"
+    }
+  },
+  "POST /api/orders/new": {
+    "description": "Adds a new order",
+    "inputBodyExample": {
+      "total_amount": 150.0,
+      "payment_status": "complete",
+      "order_items": [
+        {
+          "event_ticket_id": 2,
+          "ticket_price": 50.0,
+          "quantity": 3
+        }
+      ],
+      "queries": [],
+      "header": "JWT Token",
+      "exampleResponse": {
+        "order": {
+          "order": {
+            "id": 63,
+            "user_id": 3,
+            "customer_name": "Karl WithaK",
+            "customer_email": "karlk@carlsworld.com",
+            "total_amount": 150.0,
+            "payment_status": "complete",
+            "created_at": "2024-06-14T10:10:36.851Z",
+            "updated_at": "2024-06-14T10:10:36.851Z"
+          },
+          "orderItems": {
+            "event_id": 1,
+            "event_name": "Techno Party",
+            "event_date": "2024-06-14T10:10:36.851Z",
+            "ticket_quantity": 3,
+            "event_ticket_id": 2,
+            "ticket_name": "General Admission",
+            "ticket_description": "General admission to party",
+            "ticket_price": 50.0,
+            "heads_per_ticket": 1
+          }
+        },
+        "token": "JWT Token"
+      }
+    }
+  },
+  "DELETE /api/orders/delete/order-item/:orderItemId": {
+    "description": "Allows admin to delete an order item from an order",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg:": "Order item deleted",
+      "orderItem": {
+        "id": 63,
+        "order_id": 3,
+        "event_ticket_id": 5,
+        "ticket_price": 50.0,
+        "quantity": 3,
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "newOrderTotal": 75
+    },
+    "token": "JWT Token"
+  },
+  "DELETE /api/orders/delete/:orderId": {
+    "description": "Allows admin to delete an order along with its order items",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg:": "Order deleted",
+      "order": {
+        "id": 63,
+        "user_id": 3,
+        "customer_name": "Karl WithaK",
+        "customer_email": "karlk@carlsworld.com",
+        "total_amount": 150.0,
+        "payment_status": "complete",
+        "created_at": "2024-06-14T10:10:36.851Z",
+        "updated_at": "2024-06-14T10:10:36.851Z"
+      },
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/orders/": {
+    "description": "Lets admin and staff get all orders",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "msg:": "Order deleted",
+      "orders": [
+        {
+          "id": 63,
+          "user_id": 3,
+          "customer_name": "Karl WithaK",
+          "customer_email": "karlk@carlsworld.com",
+          "total_amount": 150.0,
+          "payment_status": "complete",
+          "created_at": "2024-06-14T10:10:36.851Z",
+          "updated_at": "2024-06-14T10:10:36.851Z"
+        }
+      ],
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/orders/user": {
+    "description": "Gets all orders for a user",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "orders": [
+        {
+          "id": 63,
+          "user_id": 3,
+          "customer_name": "Karl WithaK",
+          "customer_email": "karlk@carlsworld.com",
+          "total_amount": 150.0,
+          "payment_status": "complete",
+          "created_at": "2024-06-14T10:10:36.851Z",
+          "updated_at": "2024-06-14T10:10:36.851Z"
+        }
+      ],
+      "token": "JWT Token"
+    }
+  },
+  "GET /api/orders/:orderId": {
+    "description": "Gets an order by its ID",
+    "queries": [],
+    "header": "JWT Token",
+    "exampleResponse": {
+      "order": {
+        "order": {
+          "id": 63,
+          "user_id": 3,
+          "customer_name": "Karl WithaK",
+          "customer_email": "karlk@carlsworld.com",
+          "total_amount": 150.0,
+          "payment_status": "complete",
+          "created_at": "2024-06-14T10:10:36.851Z",
+          "updated_at": "2024-06-14T10:10:36.851Z"
+        },
+        "orderItems": [
+          {
+            "event_id": 1,
+            "event_name": "Techno Party",
+            "event_date": "2024-06-14T10:10:36.851Z",
+            "ticket_quantity": 3,
+            "event_ticket_id": 2,
+            "ticket_name": "General Admission",
+            "ticket_description": "General admission to party",
+            "ticket_price": 50.0,
+            "heads_per_ticket": 1
+          }
+        ],
+        "token": "JWT Token"
+      }
+    }
+  }
+}

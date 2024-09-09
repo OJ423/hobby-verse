@@ -1,4 +1,5 @@
 const apiRouter = require('express').Router();
+const { endpointsJSON } = require('../controllers/endpoints.controllers');
 const categoriesRouter = require('./categoriesRouter');
 const eventsRouter = require('./eventsRouter');
 const eventTicketsRouter = require('./eventTicketsRouter');
@@ -12,5 +13,6 @@ apiRouter.use('/tickets', ticketsRouter)
 apiRouter.use('/event-tickets', eventTicketsRouter)
 apiRouter.use('/users', usersRouter)
 apiRouter.use('/orders', ordersRouter)
+apiRouter.get('/', endpointsJSON)
 
 module.exports = apiRouter
