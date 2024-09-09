@@ -72,7 +72,7 @@ exports.updateUserPassword = async (req, res, next) => {
     const { body } = req;
     const user = await verifyUserUpdatePassword(body, token)
     const newToken = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
-    res.status(201).send({msg: 'You password has been changed successfully.', user, token: newToken})
+    res.status(201).send({msg: 'Your password has been changed successfully.', user, token: newToken})
   } 
   catch(err) {
     next(err)

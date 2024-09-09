@@ -269,7 +269,7 @@ describe("Events", () => {
     })
   })
   // GET EVENT ATTENDEES
-  it.only("gets event attendees if u", () => {
+  it("gets event attendees if u", () => {
     const token = jwt.sign(
       { id: 1, name: "Admin User" }, JWT_SECRET,
       { expiresIn: "15m" }
@@ -279,7 +279,6 @@ describe("Events", () => {
     .set("Authorization", `Bearer ${token}`)
     .expect(200)
     .then(({body}) => {
-      console.log(body.attendees)
       expect(body.attendees.length).toBe(4)
       expect(body.attendees[0].customer_name).toBe("Customer User 1")
       expect(body.attendees[0].ticket_name).toBe("Early Bird")
@@ -789,7 +788,7 @@ describe("Users", () => {
           .expect(201);
       })
       .then(({ body }) => {
-        expect(body.msg).toBe("You password has been changed successfully.");
+        expect(body.msg).toBe("Your password has been changed successfully.");
         return bcrypt.compare("password321", body.user.password_hash).then((isMatch) => {
           expect(isMatch).toBe(true);
         });
@@ -920,7 +919,7 @@ describe("Orders", () => {
       { expiresIn: "15m" }
     );
     return request(app)
-    .delete('/api/orders/order-item/5')
+    .delete('/api/orders/delete/order-item/5')
     .set("Authorization", `Bearer ${token}`)
     .expect(200)
     .then(({body}) => {
@@ -937,14 +936,14 @@ describe("Orders", () => {
       { expiresIn: "15m" }
     );
     return request(app)
-    .delete('/api/orders/order-item/5')
+    .delete('/api/orders/delete/order-item/5')
     .set("Authorization", `Bearer ${token}`)
     .expect(401)
     .then(({body}) => {
       expect(body.msg).toBe("You are not authorised to delete this order item")
     })
   })
-  // DELETE ORDER ITEM
+  // DELETE ORDER
   it("deletes an order and associated order items, adding back to the event ticket quantity if the user is admin", () => {
     const token = jwt.sign(
       { id: 1, name: "Admin User" },
@@ -952,7 +951,7 @@ describe("Orders", () => {
       { expiresIn: "15m" }
     );
     return request(app)
-    .delete('/api/orders/1')
+    .delete('/api/orders/delete/1')
     .set("Authorization", `Bearer ${token}`)
     .expect(200)
     .then(({body}) => {
