@@ -2,7 +2,7 @@ const { db } = require("../db/connection");
 
 exports.fetchAllEvents = async (category) => {
   try {
-    let sqlQuery = `SELECT * FROM events WHERE status = $1`
+    let sqlQuery = `SELECT * FROM events WHERE status = $1 AND date > NOW()`;
 
     const queryParams = ["published"];
 

@@ -57,7 +57,7 @@ exports.forgotPasswordRequest = async (req, res, next) => {
   try {
     const {body} = req
     await checkUserForPasswordReset(body)
-    const verificationToken = await jwt.sign({ email: body.email }, process.env.PASS_RESET, { expiresIn: '51h' });
+    const verificationToken = await jwt.sign({ email: body.email }, PASS_RESET, { expiresIn: '51h' });
     await sendPasswordResetEmail(body.email, verificationToken)
     res.status(200).send({msg: 'Please check your email to change your password.'})
   }
