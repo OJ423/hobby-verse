@@ -13,7 +13,7 @@ const PASS_RESET = process.env.PASS_RESET;
 beforeEach(async() => await seedTest(testData));
 afterAll(() => db.end());
 
-describe("Events", () => {
+describe.only("Events", () => {
   // GET EVENTS
   it("responds with all events", () => {
     return request(app)

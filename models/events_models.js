@@ -1,13 +1,15 @@
 const { db } = require("../db/connection");
 
-exports.fetchAllEvents = async (category) => {
+exports.fetchAllEvents = async (category = null) => {
   try {
-    let sqlQuery = `SELECT * FROM events WHERE status = $1 AND date > NOW()`;
+    let sqlQuery = `SELECT e.*, ec.name AS category_name FROM events e
+    JOIN event_categories ec ON e.event_category_id = ec.id
+    WHERE e.status = $1 AND e.date > NOW()`;
 
     const queryParams = ["published"];
 
     if (category) {
-      sqlQuery += ` AND event_category_id = $2`
+      sqlQuery += ` AND e.event_category_id = $2`
       queryParams.push(category)
     }
 
@@ -30,8 +32,9 @@ exports.fetchAllEvents = async (category) => {
 exports.fetchEvent = async (id) => {
   try {
     const {rows} = await db.query(`
-      SELECT * FROM events
-      WHERE id = $1`, [id])
+      SELECT e.*, ec.name AS category_name FROM events e
+      JOIN event_categories ec ON e.event_category_id = ec.id
+      WHERE e.id = $1`, [id])
     
     if(rows.length === 0){
       return Promise.reject({msg:"This event does not exist", status:404})
