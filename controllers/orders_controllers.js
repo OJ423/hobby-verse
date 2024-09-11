@@ -83,9 +83,14 @@ exports.getOrderByUser = async (req, res, next) => {
 
 exports.getOrder = async (req, res, next) => {
   try {
+    const {user} = req;
     const { orderId } = req.params;
-    const order = await fetchOrder(orderId)
-    res.status(200).send(order)
+    const order = await fetchOrder(user.id, orderId)
+    const token = await jwt.sign(
+      { id: user.id, name: user.name }, JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    res.status(200).send({order: order, token})
   }
   catch(err) {
     next(err)

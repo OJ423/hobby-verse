@@ -5,8 +5,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.getAllEvents = async (req, res, next) => {
   try{
-    const { category } = req.query
-    const events = await fetchAllEvents(category)
+    const { category, status } = req.query
+    const events = await fetchAllEvents(category, status)
     res.status(200).send({events})
   }
   catch(err) {

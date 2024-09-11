@@ -1,13 +1,13 @@
 const { db } = require("../db/connection");
 
-exports.fetchAllEvents = async (category = null) => {
+exports.fetchAllEvents = async (category = null, status = 'published') => {
   try {
     let sqlQuery = `SELECT e.*, ec.name AS category_name FROM events e
     JOIN event_categories ec ON e.event_category_id = ec.id
     WHERE e.status = $1 AND e.date > NOW()`;
 
-    const queryParams = ["published"];
-
+    const queryParams = [status];
+    console.log(status)
     if (category) {
       sqlQuery += ` AND e.event_category_id = $2`
       queryParams.push(category)

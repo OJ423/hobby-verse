@@ -15,23 +15,32 @@ afterAll(() => db.end());
 
 describe.only("Events", () => {
   // GET EVENTS
-  it("responds with all events", () => {
+  it("responds with all published events", () => {
     return request(app)
     .get("/api/events/")
     .expect(200)
     .then(({body}) => {
-      expect(body.events.length).toBe(3)
+      expect(body.events.length).toBe(2)
       expect(body.events[0].name).toBe("Jazz Night")
-      expect(body.events[2].capacity).toBe(200)
+      expect(body.events[1].capacity).toBe(50)
     })
   })
-  it("responds with events filtered by category", () => {
+  it("responds with all draft events", () => {
     return request(app)
-    .get("/api/events?category=3")
+    .get("/api/events?status=draft")
     .expect(200)
     .then(({body}) => {
       expect(body.events.length).toBe(1)
       expect(body.events[0].name).toBe("Business Conference")
+    })
+  })
+  it("responds with events filtered by category", () => {
+    return request(app)
+    .get("/api/events?category=2")
+    .expect(200)
+    .then(({body}) => {
+      expect(body.events.length).toBe(1)
+      expect(body.events[0].name).toBe("Tech Workshop")
     })
 
   })
@@ -1018,8 +1027,23 @@ describe("Orders", () => {
     .set("Authorization", `Bearer ${token}`)
     .expect(200)
     .then(({body}) => {
-      expect(body.order.id).toBe(1)
-      expect(body.orderItems.length).toBe(2)
+      console.log(body)
+      expect(body.order.order.id).toBe(1)
+      expect(body.order.orderItems.length).toBe(2)
+    })
+  })
+  it("prevents another customer seeing orders that are not theirs", () => {
+    const token = jwt.sign(
+      { id: 4, name: "Customer User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get('/api/orders/3')
+    .set("Authorization", `Bearer ${token}`)
+    .expect(403)
+    .then(({body}) => {
+      expect(body.msg).toBe("You are not allowed to view this invoice.")
     })
   })
 })

@@ -229,12 +229,20 @@ exports.fetchOrderByUser = async (userId) => {
 
 // GET SINGLE ORDER
 
-exports.fetchOrder = async (orderId) => {
+exports.fetchOrder = async (userId, orderId) => {
   try {
+    const {rows: userRole} = await db.query(`
+      SELECT role FROM users
+      WHERE id = $1`, [userId])
+
     const { rows: orderOverview } = await db.query(
       `SELECT * FROM orders
       WHERE id = $1`,
     [orderId])
+
+    if(userRole[0].role === 'customer' && +userId !== +orderOverview[0].user_id) {
+      return Promise.reject({status:403, msg: "You are not allowed to view this invoice."})
+    }
 
     const { rows: orderItems } = await db.query(`
       SELECT 

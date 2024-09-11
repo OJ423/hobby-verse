@@ -557,7 +557,6 @@
     "queries": [],
     "header": "JWT Token",
     "exampleResponse": {
-      "msg": "Event tickets deleted",
       "eventTickets": {
         "id": 2,
         "event_id": 1,

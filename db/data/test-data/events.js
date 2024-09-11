@@ -24,6 +24,6 @@ module.exports = [
     location: "Conference Center",
     capacity: 200,
     event_category_id: 3,
-    status: "published"
+    status: "draft"
   },
 ];
