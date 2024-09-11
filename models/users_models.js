@@ -155,7 +155,7 @@ exports.addAdminStaff = async ( userId, {email, role} ) => {
     if (!requester.length || (requester[0].role === "customer" || requester[0].role === "staff")) {
       return Promise.reject({msg: "You are not authorised to perform this action", status:401})
     }
-  
+    console.log(role)
     // Add admin/staff
   
     const { rows: newRole } = await db.query(`

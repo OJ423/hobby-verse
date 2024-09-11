@@ -7,7 +7,7 @@ exports.fetchAllEvents = async (category = null, status = 'published') => {
     WHERE e.status = $1 AND e.date > NOW()`;
 
     const queryParams = [status];
-    console.log(status)
+
     if (category) {
       sqlQuery += ` AND e.event_category_id = $2`
       queryParams.push(category)
