@@ -164,6 +164,26 @@
       "token": "JWT Token"
     }
   },
+  "GET /api/users/events/tickets": {
+    "description": "Gets all event tickets for a user based on their token",
+    "queries": [],
+    "header":"JWT Token",
+    "exampleResponse": {
+      "tickets": [
+        {
+          "event_name": "Jazz Night",
+          "event_description": "An evening of smooth jazz",
+          "event_location": "Jazz Club Downtown",
+          "event_date": "2024-10-10T18:00:00.000Z",
+          "ticket_name": "General Admission",
+          "ticket_description": "Access to the main event",
+          "ticket_quantity": 2,
+          "ticket_cost": 50.00
+        }
+      ],
+      "token":"JWT Token"
+    }
+  },
   "GET /api/events/": {
     "description": "Gets all published events",
     "queries": ["category"],

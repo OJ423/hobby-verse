@@ -1,4 +1,4 @@
-const { registerUser, verifyUser, loginUserByEmail, forgotPasswordRequest, updateUserPassword, patchUser, deleteUser, patchAdminStaff, getAdminStaff } = require('../controllers/users_controllers')
+const { registerUser, verifyUser, loginUserByEmail, forgotPasswordRequest, updateUserPassword, patchUser, deleteUser, patchAdminStaff, getAdminStaff, getUserTickets } = require('../controllers/users_controllers')
 const { authUserCrudOps } = require('../middlewares/authCrudOps')
 const { authMiddleware } = require('../middlewares/authMiddleware')
 
@@ -24,6 +24,9 @@ usersRouter.delete('/delete/:id', authMiddleware, authUserCrudOps, deleteUser)
 // Staff/Admin Management
 usersRouter.get('/admin', authMiddleware, getAdminStaff)
 usersRouter.patch('/admin', authMiddleware, patchAdminStaff)
+
+// Get User's Event Tickets
+usersRouter.get('/events/tickets', authMiddleware, getUserTickets)
 
 
 module.exports = usersRouter;

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { createNewUser, verifyNewUser, loginUserIn, verifyUserUpdatePassword, editUser, removeUser, addAdminStaff, fetchAdminStaff } = require("../models/users_models");
+const { createNewUser, verifyNewUser, loginUserIn, verifyUserUpdatePassword, editUser, removeUser, addAdminStaff, fetchAdminStaff, fetchUserTickets } = require("../models/users_models");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/user_emails");
 const { checkUserForPasswordReset } = require("../utils/helper_functions");
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -125,6 +125,17 @@ exports.getAdminStaff = async (req, res, next) => {
     res.status(200).send({users, token})
   }
   catch(err) {
+    next(err)
+  }
+}
+
+exports.getUserTickets = async (req, res, next) => {
+  try {
+    const {user} = req;
+    const tickets = await fetchUserTickets(user.id)
+    const token = await jwt.sign({ id: user.id, name: user. name }, JWT_SECRET, { expiresIn: '15m' });
+    res.status(200).send({tickets, token})
+  } catch(err) {
     next(err)
   }
 }

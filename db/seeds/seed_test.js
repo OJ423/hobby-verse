@@ -47,13 +47,15 @@ const seedTest = async ({
         name VARCHAR(255) NOT NULL,
         description TEXT,
         date TIMESTAMP NOT NULL,
+        end_date TIMESTAMP NOT NULL,
         location VARCHAR(255),
         capacity INT NOT NULL,
-        event_category_id INT REFERENCES event_categories(id) ON DELETE SET NULL,
+        event_category_id INT REFERENCES event_categories(id),
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW(),
         img VARCHAR DEFAULT NULL,
-        status VARCHAR(10) CHECK (status IN ('draft', 'published')) NOT NULL DEFAULT 'draft'
+        status VARCHAR(10) CHECK (status IN ('draft', 'published')) NOT NULL DEFAULT 'draft',
+        CONSTRAINT chk_end_date_after_start_date CHECK (end_date > date)
       )`);
     await db.query(`
       CREATE TABLE tickets (
@@ -130,9 +132,9 @@ const seedTest = async ({
 
     const insertEvents = format(`
       INSERT INTO events 
-      (name, description, date, location, capacity, event_category_id, img, status) VALUES %L`,
-      eventsData.map(({name, description, date, location, capacity, event_category_id, img, status}) => {
-        return [name, description, date, location, capacity, event_category_id, img, status]
+      (name, description, date, end_date, location, capacity, event_category_id, img, status) VALUES %L`,
+      eventsData.map(({name, description, date, end_date, location, capacity, event_category_id, img, status}) => {
+        return [name, description, date, end_date, location, capacity, event_category_id, img, status]
       })
     )
 

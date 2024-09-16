@@ -11,4 +11,8 @@ module.exports = [
     name: "Conference",
     description: "Business and tech conferences",
   },
+  {
+    name: "Art & Craft",
+    description: "Painting, drawing and craft workshops",
+  },
 ];

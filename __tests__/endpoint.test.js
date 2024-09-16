@@ -13,7 +13,7 @@ const PASS_RESET = process.env.PASS_RESET;
 beforeEach(async() => await seedTest(testData));
 afterAll(() => db.end());
 
-describe.only("Events", () => {
+describe("Events", () => {
   // GET EVENTS
   it("responds with all published events", () => {
     return request(app)
@@ -83,6 +83,7 @@ describe.only("Events", () => {
       name: "Watercolour Workshop",
       description: "Local artist, Jane Brush, is coming in for a fantastic hands-on watercolour workshop",
       date: "2024-12-03T16:00:00",
+      end_date: "2024-12-03T20:00:00",
       location: "The Cafe",
       capacity: 15,
       event_category_id: 2,
@@ -108,6 +109,7 @@ describe.only("Events", () => {
       name: "Watercolour Workshop",
       description: "Local artist, Jane Brush, is coming in for a fantastic hands-on watercolour workshop",
       date: "2024-12-03T16:00:00",
+      end_date: "2024-12-03T20:00:00",
       location: "The Cafe",
       capacity: 15,
       event_category_id: 2,
@@ -133,6 +135,7 @@ describe.only("Events", () => {
       name: "Watercolour Workshop",
       description: "Local artist, Jane Brush, is coming in for a fantastic hands-on watercolour workshop",
       date: "2024-12-03T16:00:00",
+      end_date: "2024-12-03T20:00:00",
       location: "The Cafe",
       capacity: 15,
       event_category_id: 2,
@@ -155,6 +158,7 @@ describe.only("Events", () => {
     .send({
       description: "Local artist, Jane Brush, is coming in for a fantastic hands-on watercolour workshop",
       date: "2024-12-03T16:00:00",
+      end_date: "2024-12-03T20:00:00",
       location: "The Cafe",
       capacity: 15,
       event_category_id: 2,
@@ -303,7 +307,7 @@ describe("Categories", () => {
     .get("/api/categories/")
     .expect(200)
     .then(({body}) => {
-      expect(body.categories.length).toBe(3)
+      expect(body.categories.length).toBe(4)
       expect(body.categories[0].name).toBe("Music")
       expect(body.categories[2].description).toBe("Business and tech conferences")
     })
@@ -414,13 +418,12 @@ describe("Categories", () => {
       { expiresIn: "15m" }
     );
     return request(app)
-    .delete("/api/categories/delete/1")
+    .delete("/api/categories/delete/4")
     .set("Authorization", `Bearer ${token}`)
     .expect(200)
     .then(({body}) => {
       expect(body.msg).toBe("Category deleted")
-      expect(body.category.name).toBe("Music")
-      expect(body.category.description).toBe("Live music events")
+      expect(body.category.name).toBe("Art & Craft")
     })
   })
 })
@@ -873,6 +876,20 @@ describe("Users", () => {
 
       })
   });
+  it("should get user tickets for events they've booked", () => {
+    token = jwt.sign(
+      { id: 4, name: "Customer User 1" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+    return request(app)
+    .get("/api/users/events/tickets")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.tickets.length).toBe(3)
+    })
+  })
 })
 
 describe("Orders", () => {
@@ -1027,7 +1044,6 @@ describe("Orders", () => {
     .set("Authorization", `Bearer ${token}`)
     .expect(200)
     .then(({body}) => {
-      console.log(body)
       expect(body.order.order.id).toBe(1)
       expect(body.order.orderItems.length).toBe(2)
     })

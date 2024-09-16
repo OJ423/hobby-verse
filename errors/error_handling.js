@@ -1,6 +1,6 @@
 exports.psqlErrors = (err, req, res, next) => {
   if (err.code === "23505") {
-    res.status(400).send({msg: "Community already exists."})
+    res.status(400).send({msg: "This ticket already exists. Please change the quantity of the ticket."})
   } 
   if (err.code === "22P02") {
       res.status(400).send({msg: "Invalid data type"})

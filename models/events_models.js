@@ -1,6 +1,6 @@
 const { db } = require("../db/connection");
 
-exports.fetchAllEvents = async (category = null, status = 'published') => {
+exports.fetchAllEvents = async (category = null, status = "published") => {
   try {
     let sqlQuery = `SELECT e.*, ec.name AS category_name FROM events e
     JOIN event_categories ec ON e.event_category_id = ec.id
@@ -9,21 +9,13 @@ exports.fetchAllEvents = async (category = null, status = 'published') => {
     const queryParams = [status];
 
     if (category) {
-      sqlQuery += ` AND e.event_category_id = $2`
-      queryParams.push(category)
+      sqlQuery += ` AND e.event_category_id = $2`;
+      queryParams.push(category);
     }
-
+    const {rows: TestQuery} = await db.query(`SELECT * FROM events`)
     const { rows } = await db.query(sqlQuery, queryParams);
-    
-    if (rows.length === 0) {
-      return Promise.reject({
-        msg: "There are no events in the calendar currently",
-        status: 404,
-      });
-    } else {
-      return rows;
-    }
 
+    return {rows, TestQuery};
   } catch (err) {
     throw err;
   }
@@ -31,53 +23,97 @@ exports.fetchAllEvents = async (category = null, status = 'published') => {
 
 exports.fetchEvent = async (id) => {
   try {
-    const {rows} = await db.query(`
+    const { rows } = await db.query(
+      `
       SELECT e.*, ec.name AS category_name FROM events e
       JOIN event_categories ec ON e.event_category_id = ec.id
-      WHERE e.id = $1`, [id])
-    
-    if(rows.length === 0){
-      return Promise.reject({msg:"This event does not exist", status:404})
-    }
-  
-    return rows[0]
-  }
-  catch (err) {
-    throw(err)
-  }
-}
+      WHERE e.id = $1`,
+      [id]
+    );
 
-exports.insertEvent = async (userId, {name, description = null, date, location = null, capacity, event_category_id, img, status }) => {
+    if (rows.length === 0) {
+      return Promise.reject({ msg: "This event does not exist", status: 404 });
+    }
+
+    return rows[0];
+  } catch (err) {
+    throw err;
+  }
+};
+
+exports.insertEvent = async (
+  userId,
+  {
+    name,
+    description = null,
+    date,
+    end_date,
+    location = null,
+    capacity,
+    event_category_id,
+    img,
+    status,
+  }
+) => {
   try {
-    const {rows} = await db.query(`
+    const { rows } = await db.query(
+      `
       WITH user_check AS (
         SELECT role 
         FROM users 
         WHERE id = $1
       )
       INSERT INTO events 
-        (name, description, date, location, capacity, event_category_id, img, status)
-      SELECT $2, $3, $4, $5, $6, $7, $8, $9
+        (name, description, date, end_date, location, capacity, event_category_id, img, status)
+      SELECT $2, $3, $4, $5, $6, $7, $8, $9, $10
       FROM user_check
       WHERE role IN ('staff', 'admin')
       RETURNING *;  
-    `, [userId, name, description, date, location, capacity, event_category_id, img, status])
-    
+    `,
+      [
+        userId,
+        name,
+        description,
+        date,
+        end_date,
+        location,
+        capacity,
+        event_category_id,
+        img,
+        status,
+      ]
+    );
+
     if (!rows.length) {
-      return Promise.reject({msg: "You are unauthorized to add an event", status: 401})
+      return Promise.reject({
+        msg: "You are unauthorized to add an event",
+        status: 401,
+      });
     }
 
-    return rows[0]
+    return rows[0];
+  } catch (err) {
+    throw err;
   }
-  catch(err) {
-    throw(err)
+};
+
+exports.editEvent = async (
+  userId,
+  eventId,
+  {
+    name = null,
+    description = null,
+    date = null,
+    location = null,
+    capacity = null,
+    event_category_id = null,
+    img = null,
+    status = null,
   }
-}
-
-
-exports.editEvent = async ( userId, eventId, {name = null, description = null, date = null, location = null, capacity = null, event_category_id = null, img = null, status = null }) => {
+) => {
   try {
-    const {rows} = await db.query(`
+    const { rows } = await db.query(
+      `
       WITH user_check AS (
         SELECT role 
         FROM users 
@@ -99,23 +135,38 @@ exports.editEvent = async ( userId, eventId, {name = null, description = null, d
       AND role IN ('staff', 'admin')
       RETURNING *;
   
-    `, [userId, eventId, name, description, date, location, capacity, event_category_id, img, status])
-    
+    `,
+      [
+        userId,
+        eventId,
+        name,
+        description,
+        date,
+        location,
+        capacity,
+        event_category_id,
+        img,
+        status,
+      ]
+    );
+
     if (!rows.length) {
-      return Promise.reject({msg: "You are unauthorized to edit this event", status: 401})
+      return Promise.reject({
+        msg: "You are unauthorized to edit this event",
+        status: 401,
+      });
     }
 
-    return rows[0]
+    return rows[0];
+  } catch (err) {
+    throw err;
   }
-  catch(err) {
-    throw(err)
-  }
-}
+};
 
-
-exports.removeEvent = async ( userId, eventId) => {
+exports.removeEvent = async (userId, eventId) => {
   try {
-    const {rows} = await db.query(`
+    const { rows } = await db.query(
+      `
       WITH user_check AS (
           SELECT role 
           FROM users 
@@ -129,33 +180,44 @@ exports.removeEvent = async ( userId, eventId) => {
           WHERE role IN ('staff', 'admin')
       )
       RETURNING *;
-`, [userId, eventId])
-    
+`,
+      [userId, eventId]
+    );
+
     if (!rows.length) {
-      return Promise.reject({msg: "You are unauthorized to delete this event", status: 401})
+      return Promise.reject({
+        msg: "You are unauthorized to delete this event",
+        status: 401,
+      });
     }
 
-    return rows[0]
+    return rows[0];
+  } catch (err) {
+    throw err;
   }
-  catch(err) {
-    throw(err)
-  }
-}
+};
 
 // GET EVENT ATTENDEES
 
 exports.fetchEventAttendees = async (userId, eventId) => {
   try {
     // Check user is staff or admin
-    const { rows: authCheck } = await db.query(`
+    const { rows: authCheck } = await db.query(
+      `
       SELECT role FROM users
-      WHERE id = $1`, [userId])
-    
+      WHERE id = $1`,
+      [userId]
+    );
+
     if (authCheck[0].role === "customer" || !authCheck.length) {
-      return Promise.reject({msg: "You are not authorised to see this.", status: 401})
+      return Promise.reject({
+        msg: "You are not authorised to see this.",
+        status: 401,
+      });
     }
 
-    const { rows: attendees } = await db.query(`
+    const { rows: attendees } = await db.query(
+      `
       SELECT 
         e.id AS event_id,
         e.name AS event_name,
@@ -178,11 +240,12 @@ exports.fetchEventAttendees = async (userId, eventId) => {
       JOIN 
         users u ON o.user_id = u.id
       WHERE 
-        et.event_id = $1;`, [eventId])
-    
-    return attendees
+        et.event_id = $1;`,
+      [eventId]
+    );
+
+    return attendees;
+  } catch (err) {
+    throw err;
   }
-  catch(err) {
-    throw err
-  }
-}
+};
