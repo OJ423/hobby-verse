@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const FRONTEND_URL = process.env.FRONTEND_URL
 
 // Transporter Config
 
@@ -14,7 +15,7 @@ const transporter = nodemailer.createTransport({
 // Registration Verification
 
 exports.sendVerificationEmail = (email, token) => {
-  const url = `http://localhost:3000/user/verify-email?token=${token}`;
+  const url = `${FRONTEND_URL}/user/verify-email?token=${token}`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -31,7 +32,7 @@ exports.sendVerificationEmail = (email, token) => {
 // Password Reset Verification Email
 
 exports.sendPasswordResetEmail = (email, token) => {
-  const url = `http://localhost:3000/update-password?token=${token}`;
+  const url = `${FRONTEND_URL}/update-password?token=${token}`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
