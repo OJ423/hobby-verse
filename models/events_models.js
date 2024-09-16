@@ -12,10 +12,9 @@ exports.fetchAllEvents = async (category = null, status = "published") => {
       sqlQuery += ` AND e.event_category_id = $2`;
       queryParams.push(category);
     }
-    const {rows: TestQuery} = await db.query(`SELECT * FROM events`)
     const { rows } = await db.query(sqlQuery, queryParams);
 
-    return {rows, TestQuery};
+    return rows;
   } catch (err) {
     throw err;
   }
