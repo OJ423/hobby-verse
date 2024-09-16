@@ -94,10 +94,11 @@ const seedProduction = async () => {
     );`)
 
     // ADD USER
+    const encryptedPassword = hashPasswords("shortliquid66")
 
     await db.query(`INSERT INTO users (
         name, email, password_hash, role, verified)
-        VALUES (Oliver, osmith.dpm@gmail.com, $1, admin, true)`, [encryptedPassword])
+        VALUES ('Oliver', 'osmith.dpm@gmail.com', $1, 'admin', true)`, [encryptedPassword])
 
    
 
@@ -106,4 +107,4 @@ const seedProduction = async () => {
   }
 };
 
-module.exports = seedTest;
+module.exports = seedProduction;

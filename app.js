@@ -4,7 +4,9 @@ const {applicationErrors, customErrors, psqlErrors} = require("./errors/error_ha
 const cors = require('cors');
 
 const app = express()
-app.use(cors());
+app.use(cors(({
+  origin: FRONTEND_URL
+})));
 app.use(express.json())
 
 app.use('/api', apiRouter)
