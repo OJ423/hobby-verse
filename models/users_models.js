@@ -222,7 +222,8 @@ exports.fetchAdminStaff = async (userId) => {
 
     const { rows: users } = await db.query(`
       SELECT * FROM users
-      WHERE role IN ('staff', 'admin');`);
+      WHERE role IN ('staff', 'admin')
+      ORDER BY name ASC;`);
 
     if (!users.length) {
       return Promise.reject({
